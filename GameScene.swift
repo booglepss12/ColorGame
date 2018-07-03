@@ -20,6 +20,9 @@ class GameScene: SKScene {
     var currentTrack = 0
     var movingToTrack = false
     let moveSound = SKAction.playSoundFileNamed("move.wav", waitForCompletion: false)
+    let trackVelocities = [180, 200, 250]
+    var directionArray = [Bool]()
+    var velocityArray = [Int]()
     
     func setUpTracks(){
         for i in 0...8{
@@ -53,9 +56,14 @@ class GameScene: SKScene {
             enemySprite.fillColor = UIColor(red: 0.7804, green: 0.6392, blue: 0.4039, alpha: 1)
             
         }
+        let up = directionArray[track]
+        
         guard let enemyPosition = tracksArray?[track].position else {return nil}
         enemySprite.position.x = enemyPosition.x
-        enemySprite.position.y = enemyPosition.y
+        enemySprite.position.y = up ? -130 : self.size.height + 130
+        
+        enemySprite.physicsBody = SKPhysicsBody(edgeLoopFrom: enemySprite.path!)
+        enemySprite.physicsBody?.velocity = up ? CGVector(dx: 0, dy: velocityArray[track]) : CGVector(dx: 0, dy: -velocityArray[track])
         
         return enemySprite
         
@@ -78,7 +86,16 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         setUpTracks()
         createPlayer()
-        tracksArray?.first?.color = UIColor.green
+        
+        if let numberOfTracks = tracksArray?.count {
+            for _ in 0...numberOfTracks{
+                let randomNumberForVelocity = GKRandomSource.sharedRandom().nextInt(upperBound: 3)
+                velocityArray.append(trackVelocities[randomNumberForVelocity])
+                directionArray.append(GKRandomSource.sharedRandom().nextBool())
+                
+                
+            }
+        }
         
     }
     
