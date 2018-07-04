@@ -8,7 +8,7 @@
 
 import SpriteKit
 import GameplayKit
-enum Enemies{
+enum Enemies:Int{
     case small
     case medium
     case large
@@ -44,6 +44,7 @@ class GameScene: SKScene {
     
     func createEnemy(type:Enemies, forTrack track:Int)-> SKShapeNode?{
         let enemySprite = SKShapeNode()
+        enemySprite.name = "ENEMY"
         switch type{
         case .small:
             enemySprite.path = CGPath(roundedRect: CGRect(x: -10, y:0, width:20, height:70), cornerWidth: 8, cornerHeight: 8, transform: nil)
@@ -67,6 +68,21 @@ class GameScene: SKScene {
         
         return enemySprite
         
+    }
+    
+    func spawnEnemies(){
+        for i in 1...7{
+            let randomEnemy = Enemies(rawValue: GKRandomSource.sharedRandom().nextInt(upperBound: 3))!
+            if let newEnemy = createEnemy(type: randomEnemy, forTrack: i){
+                self.addChild(newEnemy)
+            }
+            
+        }
+        self.enumerateChildNodes(withName: "ENEMY"){ (node: SKNode, nil) in
+            if node.position.y < -150 || node.position.y > self.size.height + 150{
+                node.removeFromParent()
+            }
+        }
     }
     
     func moveToNextTrack(){
@@ -96,7 +112,8 @@ class GameScene: SKScene {
                 
             }
         }
-        
+        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.run{
+            self.spawnEnemies()}, SKAction.wait(forDuration: 2)])))
     }
     
     func moveVertically(up:Bool){
